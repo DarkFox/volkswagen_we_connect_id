@@ -163,6 +163,22 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             ):
                 _LOGGER.error("Cannot send ac speed request to car")
 
+    @callback
+    async def volkswagen_id_send_destinations(call: ServiceCall) -> None:
+
+        vin = call.data["vin"]
+        if 'destinations' in call.data:
+            if (
+                await hass.async_add_executor_job(
+                    send_destinations,
+                    vin,
+                    _we_connect,
+                    call.data["destinations"],
+                )
+                is False
+            ):
+                _LOGGER.error("Cannot send destination to car")
+
     # Register our services with Home Assistant.
     hass.services.async_register(
         DOMAIN, "volkswagen_id_start_stop_charging", volkswagen_id_start_stop_charging
@@ -176,6 +192,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     )
     hass.services.async_register(
         DOMAIN, "volkswagen_id_set_ac_charge_speed", volkswagen_id_set_ac_charge_speed
+    )
+    hass.services.async_register(
+        DOMAIN, "volkswagen_id_send_destinations", volkswagen_id_send_destinations
     )
 
     return True
@@ -358,6 +377,23 @@ def set_climatisation(
                 except Exception as exc:
                     _LOGGER.error("Failed to send request to car - %s", exc)
                     return False
+    return True
+
+
+def send_destinations(
+    call_data_vin, api: weconnect.WeConnect,
+    destinations: str | list | dict
+) -> bool:
+    """Send destination to your volkswagen."""
+
+    for vin, vehicle in api.vehicles.items():
+        if vin == call_data_vin:
+            try:
+                vehicle.controls.sendDestinations.value = destinations
+                _LOGGER.info("Sended destination call to the car")
+            except Exception as exc:
+                _LOGGER.error("Failed to send request to car - %s", exc)
+                return False
     return True
 
 
