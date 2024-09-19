@@ -91,3 +91,38 @@ volkswagen_id_set_ac_charge_speed:
           options:
             - "maximum"
             - "reduced"
+
+volkswagen_id_send_destinations:
+  name: Volkswagen ID Send Destinations
+  description: Send destination or a route to the car.
+  fields:
+    vin:
+      name: VIN
+      description: Vehicle identification number for the car.
+      required: true
+      example: WVGZZZA1ZMP001337
+      selector:
+        text:
+    destinations:
+      name: Destinations
+      description: A destination or route to send to the car. Takes a list of destination dicts or a single destination dict. `geoCoordinate` is required, everything else is optional and for display purposes only.
+      required: true
+      example: |
+        - geoCoordinate:
+            latitude: 44.5905594
+            longitude: -104.7178527
+        - name: VW Museum
+          geoCoordinate:
+            latitude: 52.4278793
+            longitude: 10.8077433
+        - name: Autostadt
+          address:
+            country: Germany
+            street: Stadtbrücke
+            zipCode: 38440
+            city: Wolfsburg
+          geoCoordinate:
+            latitude: 52.429380
+            longitude: 10.791520
+      selector:
+        object:
